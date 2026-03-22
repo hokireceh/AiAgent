@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Groq AI Agent"
+version = "1.0.0"
+id = "artifacts/groq-agent"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24078
+
+[services.development]
+run = "pnpm --filter @workspace/groq-agent run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/groq-agent", "run", "build" ]
+publicDir = "artifacts/groq-agent/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24078"
+BASE_PATH = "/"

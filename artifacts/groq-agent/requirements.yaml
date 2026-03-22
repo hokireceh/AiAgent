@@ -1,0 +1,13 @@
+packages:
+  "react-markdown": "Render markdown in AI responses"
+  "remark-gfm": "Support for markdown tables and formatting"
+  "framer-motion": "Smooth animations for chat bubbles and panels"
+  "date-fns": "Human-readable date formatting for conversation history"
+  "clsx": "Utility for constructing className strings"
+  "tailwind-merge": "Utility for merging tailwind classes"
+
+images: []
+
+notes:
+  - Using generated TanStack Query hooks from @workspace/api-client-react
+  - Defaulting the theme to a sophisticated dark mode

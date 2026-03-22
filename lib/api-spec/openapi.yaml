@@ -1,0 +1,504 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Groq AI Agent API with cascade model support
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: chat
+    description: Chat operations
+  - name: usage
+    description: Usage tracking operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /chat:
+    post:
+      operationId: sendMessage
+      tags: [chat]
+      summary: Send a chat message
+      description: Send message to AI with cascade model fallback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "429":
+          description: All models rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /chat/conversations:
+    get:
+      operationId: getConversations
+      tags: [chat]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationsResponse"
+    post:
+      operationId: createConversation
+      tags: [chat]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationRequest"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /chat/conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [chat]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteConversation
+      tags: [chat]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /usage:
+    get:
+      operationId: getUsage
+      tags: [usage]
+      summary: Get daily usage per model
+      responses:
+        "200":
+          description: Usage stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageResponse"
+
+  /models:
+    get:
+      operationId: getModels
+      tags: [chat]
+      summary: Get available models with tier info
+      responses:
+        "200":
+          description: Model list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelsResponse"
+
+  /memories:
+    get:
+      operationId: getMemories
+      tags: [memory]
+      summary: Get all memories
+      responses:
+        "200":
+          description: All memories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoriesResponse"
+    post:
+      operationId: createMemory
+      tags: [memory]
+      summary: Create a memory manually
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemoryRequest"
+      responses:
+        "201":
+          description: Created memory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryItem"
+
+  /memories/{id}:
+    delete:
+      operationId: deleteMemory
+      tags: [memory]
+      summary: Delete a memory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /memories/search:
+    get:
+      operationId: searchMemories
+      tags: [memory]
+      summary: Search memories
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoriesResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ChatRequest:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          nullable: true
+        message:
+          type: string
+        systemPrompt:
+          type: string
+          nullable: true
+      required:
+        - message
+
+    ChatResponse:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+        messageId:
+          type: integer
+        content:
+          type: string
+        model:
+          type: string
+        tier:
+          type: integer
+        tokensUsed:
+          type: integer
+      required:
+        - conversationId
+        - messageId
+        - content
+        - model
+        - tier
+        - tokensUsed
+
+    CreateConversationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        systemPrompt:
+          type: string
+          nullable: true
+      required:
+        - title
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        systemPrompt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+      required:
+        - id
+        - title
+        - createdAt
+        - updatedAt
+        - messageCount
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        model:
+          type: string
+          nullable: true
+        tier:
+          type: integer
+          nullable: true
+        tokensUsed:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    ConversationsResponse:
+      type: object
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+      required:
+        - conversations
+
+    ConversationDetail:
+      type: object
+      properties:
+        conversation:
+          $ref: "#/components/schemas/Conversation"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - conversation
+        - messages
+
+    ModelInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        tier:
+          type: integer
+        dailyLimit:
+          type: integer
+        usedToday:
+          type: integer
+        available:
+          type: boolean
+      required:
+        - id
+        - name
+        - tier
+        - dailyLimit
+        - usedToday
+        - available
+
+    ModelsResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelInfo"
+      required:
+        - models
+
+    UsageStats:
+      type: object
+      properties:
+        modelId:
+          type: string
+        modelName:
+          type: string
+        tier:
+          type: integer
+        requestsToday:
+          type: integer
+        dailyLimit:
+          type: integer
+        remainingToday:
+          type: integer
+        date:
+          type: string
+      required:
+        - modelId
+        - modelName
+        - tier
+        - requestsToday
+        - dailyLimit
+        - remainingToday
+        - date
+
+    UsageResponse:
+      type: object
+      properties:
+        usage:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsageStats"
+        totalRequestsToday:
+          type: integer
+        totalRemainingToday:
+          type: integer
+      required:
+        - usage
+        - totalRequestsToday
+        - totalRemainingToday
+
+    MemoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - content
+        - category
+        - createdAt
+        - updatedAt
+
+    MemoriesResponse:
+      type: object
+      properties:
+        memories:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryItem"
+      required:
+        - memories
+
+    CreateMemoryRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        category:
+          type: string
+      required:
+        - content
+        - category
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
