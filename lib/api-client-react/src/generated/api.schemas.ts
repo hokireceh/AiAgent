@@ -121,6 +121,115 @@ export interface ErrorResponse {
   message: string;
 }
 
+export interface WorkspaceItem {
+  id: number;
+  name: string;
+  language: string;
+  description?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkspacesResponse {
+  workspaces: WorkspaceItem[];
+}
+
+export interface CreateWorkspaceRequest {
+  name: string;
+  language: string;
+  description?: string;
+}
+
+export interface UpdateWorkspaceRequest {
+  name?: string;
+  language?: string;
+  description?: string;
+}
+
+export interface FileItem {
+  id: number;
+  workspaceId: number;
+  name: string;
+  path: string;
+  content: string;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkspaceWithFiles {
+  workspace: WorkspaceItem;
+  files: FileItem[];
+}
+
+export interface CreateFileRequest {
+  name: string;
+  path: string;
+  content?: string;
+  language: string;
+}
+
+export interface UpdateFileRequest {
+  content: string;
+  name?: string;
+}
+
+export interface ExecuteRequest {
+  language: string;
+  version: string;
+  code: string;
+  stdin?: string | null;
+}
+
+export interface ExecuteResponse {
+  stdout: string;
+  stderr: string;
+  output: string;
+  exitCode: number;
+  language: string;
+  version: string;
+  cpuTime?: number | null;
+  wallTime?: number | null;
+}
+
+export interface RuntimeItem {
+  language: string;
+  version: string;
+  aliases: string[];
+  runtime?: string | null;
+}
+
+export interface RuntimesResponse {
+  runtimes: RuntimeItem[];
+}
+
+export type AiCodeRequestHistoryItemRole =
+  (typeof AiCodeRequestHistoryItemRole)[keyof typeof AiCodeRequestHistoryItemRole];
+
+export const AiCodeRequestHistoryItemRole = {
+  user: "user",
+  assistant: "assistant",
+} as const;
+
+export type AiCodeRequestHistoryItem = {
+  role: AiCodeRequestHistoryItemRole;
+  content: string;
+};
+
+export interface AiCodeRequest {
+  message: string;
+  code?: string | null;
+  language?: string | null;
+  filename?: string | null;
+  history?: AiCodeRequestHistoryItem[] | null;
+}
+
+export interface AiCodeResponse {
+  content: string;
+  model: string;
+  tier: number;
+}
+
 export type SearchMemoriesParams = {
   q: string;
 };

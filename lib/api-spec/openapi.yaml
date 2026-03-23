@@ -226,6 +226,223 @@ paths:
               schema:
                 $ref: "#/components/schemas/MemoriesResponse"
 
+  /workspaces:
+    get:
+      operationId: getWorkspaces
+      tags: [workspace]
+      summary: List all workspaces
+      responses:
+        "200":
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspacesResponse"
+    post:
+      operationId: createWorkspace
+      tags: [workspace]
+      summary: Create a workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceRequest"
+      responses:
+        "201":
+          description: Created workspace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceItem"
+
+  /workspaces/{id}:
+    get:
+      operationId: getWorkspace
+      tags: [workspace]
+      summary: Get workspace with all files
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workspace with files
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceWithFiles"
+    put:
+      operationId: updateWorkspace
+      tags: [workspace]
+      summary: Update workspace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkspaceRequest"
+      responses:
+        "200":
+          description: Updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceItem"
+    delete:
+      operationId: deleteWorkspace
+      tags: [workspace]
+      summary: Delete a workspace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /workspaces/{id}/files:
+    post:
+      operationId: createFile
+      tags: [workspace]
+      summary: Create a file in workspace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFileRequest"
+      responses:
+        "201":
+          description: Created file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileItem"
+
+  /workspaces/{id}/files/{fileId}:
+    put:
+      operationId: updateFile
+      tags: [workspace]
+      summary: Update file content
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFileRequest"
+      responses:
+        "200":
+          description: Updated file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileItem"
+    delete:
+      operationId: deleteFile
+      tags: [workspace]
+      summary: Delete a file
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /execute:
+    post:
+      operationId: executeCode
+      tags: [execute]
+      summary: Execute code in sandbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteRequest"
+      responses:
+        "200":
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecuteResponse"
+
+  /execute/runtimes:
+    get:
+      operationId: getRuntimes
+      tags: [execute]
+      summary: Get available language runtimes
+      responses:
+        "200":
+          description: Available runtimes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuntimesResponse"
+
+  /ai/code:
+    post:
+      operationId: aiCodeAssist
+      tags: [ai]
+      summary: AI code assistant with code context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiCodeRequest"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiCodeResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -502,3 +719,251 @@ components:
       required:
         - error
         - message
+
+    WorkspaceItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        language:
+          type: string
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - language
+        - createdAt
+        - updatedAt
+
+    WorkspacesResponse:
+      type: object
+      properties:
+        workspaces:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceItem"
+      required:
+        - workspaces
+
+    CreateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        language:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+        - language
+
+    UpdateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        language:
+          type: string
+        description:
+          type: string
+
+    FileItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        workspaceId:
+          type: integer
+        name:
+          type: string
+        path:
+          type: string
+        content:
+          type: string
+        language:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - workspaceId
+        - name
+        - path
+        - content
+        - language
+        - createdAt
+        - updatedAt
+
+    WorkspaceWithFiles:
+      type: object
+      properties:
+        workspace:
+          $ref: "#/components/schemas/WorkspaceItem"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileItem"
+      required:
+        - workspace
+        - files
+
+    CreateFileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        content:
+          type: string
+        language:
+          type: string
+      required:
+        - name
+        - path
+        - language
+
+    UpdateFileRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        name:
+          type: string
+      required:
+        - content
+
+    ExecuteRequest:
+      type: object
+      properties:
+        language:
+          type: string
+        version:
+          type: string
+        code:
+          type: string
+        stdin:
+          type: string
+          nullable: true
+      required:
+        - language
+        - version
+        - code
+
+    ExecuteResponse:
+      type: object
+      properties:
+        stdout:
+          type: string
+        stderr:
+          type: string
+        output:
+          type: string
+        exitCode:
+          type: integer
+        language:
+          type: string
+        version:
+          type: string
+        cpuTime:
+          type: number
+          nullable: true
+        wallTime:
+          type: number
+          nullable: true
+      required:
+        - stdout
+        - stderr
+        - output
+        - exitCode
+        - language
+        - version
+
+    RuntimeItem:
+      type: object
+      properties:
+        language:
+          type: string
+        version:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        runtime:
+          type: string
+          nullable: true
+      required:
+        - language
+        - version
+        - aliases
+
+    RuntimesResponse:
+      type: object
+      properties:
+        runtimes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuntimeItem"
+      required:
+        - runtimes
+
+    AiCodeRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        filename:
+          type: string
+          nullable: true
+        history:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant]
+              content:
+                type: string
+            required:
+              - role
+              - content
+      required:
+        - message
+
+    AiCodeResponse:
+      type: object
+      properties:
+        content:
+          type: string
+        model:
+          type: string
+        tier:
+          type: integer
+      required:
+        - content
+        - model
+        - tier

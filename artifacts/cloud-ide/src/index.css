@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-panel: hsl(var(--panel));
+  --color-panel-border: hsl(var(--panel-border));
+  --color-panel-hover: hsl(var(--panel-hover));
+
+  --color-tab-active: hsl(var(--tab-active));
+  --color-tab-inactive: hsl(var(--tab-inactive));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* VS Code Dark / Sleek IDE Palette */
+  --background: 220 14% 10%; /* #17181a */
+  --foreground: 210 20% 90%; /* #e2e4e9 */
+
+  --panel: 220 14% 12%; /* #1b1d20 */
+  --panel-border: 220 14% 18%; /* #27292e */
+  --panel-hover: 220 14% 15%;
+
+  --tab-active: 220 14% 10%;
+  --tab-inactive: 220 14% 14%;
+
+  --primary: 217 91% 60%; /* Bright blue */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 14% 18%;
+  --secondary-foreground: 210 20% 90%;
+
+  --muted: 220 14% 16%;
+  --muted-foreground: 215 14% 60%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 152 69% 51%;
+  --success-foreground: 0 0% 100%;
+
+  --border: 220 14% 18%;
+  --input: 220 14% 16%;
+  --ring: 217 91% 60%;
+
+  --card: 220 14% 12%;
+  --card-foreground: 210 20% 90%;
+
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html, body, #root {
+    @apply h-full w-full m-0 p-0 overflow-hidden bg-background text-foreground font-sans antialiased selection:bg-primary/30;
+  }
+}
+
+@layer utilities {
+  /* Custom Scrollbar for IDE feel */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-panel-border rounded-full border-[3px] border-solid border-transparent bg-clip-padding;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}

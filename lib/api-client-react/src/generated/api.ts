@@ -17,21 +17,34 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AiCodeRequest,
+  AiCodeResponse,
   ChatRequest,
   ChatResponse,
   Conversation,
   ConversationDetail,
   ConversationsResponse,
   CreateConversationRequest,
+  CreateFileRequest,
   CreateMemoryRequest,
+  CreateWorkspaceRequest,
   ErrorResponse,
+  ExecuteRequest,
+  ExecuteResponse,
+  FileItem,
   HealthStatus,
   MemoriesResponse,
   MemoryItem,
   ModelsResponse,
+  RuntimesResponse,
   SearchMemoriesParams,
   SuccessResponse,
+  UpdateFileRequest,
+  UpdateWorkspaceRequest,
   UsageResponse,
+  WorkspaceItem,
+  WorkspaceWithFiles,
+  WorkspacesResponse,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -1011,3 +1024,929 @@ export function useSearchMemories<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all workspaces
+ */
+export const getGetWorkspacesUrl = () => {
+  return `/api/workspaces`;
+};
+
+export const getWorkspaces = async (
+  options?: RequestInit,
+): Promise<WorkspacesResponse> => {
+  return customFetch<WorkspacesResponse>(getGetWorkspacesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetWorkspacesQueryKey = () => {
+  return [`/api/workspaces`] as const;
+};
+
+export const getGetWorkspacesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWorkspaces>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getWorkspaces>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetWorkspacesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkspaces>>> = ({
+    signal,
+  }) => getWorkspaces({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getWorkspaces>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetWorkspacesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWorkspaces>>
+>;
+export type GetWorkspacesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all workspaces
+ */
+
+export function useGetWorkspaces<
+  TData = Awaited<ReturnType<typeof getWorkspaces>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getWorkspaces>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetWorkspacesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a workspace
+ */
+export const getCreateWorkspaceUrl = () => {
+  return `/api/workspaces`;
+};
+
+export const createWorkspace = async (
+  createWorkspaceRequest: CreateWorkspaceRequest,
+  options?: RequestInit,
+): Promise<WorkspaceItem> => {
+  return customFetch<WorkspaceItem>(getCreateWorkspaceUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createWorkspaceRequest),
+  });
+};
+
+export const getCreateWorkspaceMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createWorkspace>>,
+    TError,
+    { data: BodyType<CreateWorkspaceRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createWorkspace>>,
+  TError,
+  { data: BodyType<CreateWorkspaceRequest> },
+  TContext
+> => {
+  const mutationKey = ["createWorkspace"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createWorkspace>>,
+    { data: BodyType<CreateWorkspaceRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createWorkspace(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateWorkspaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createWorkspace>>
+>;
+export type CreateWorkspaceMutationBody = BodyType<CreateWorkspaceRequest>;
+export type CreateWorkspaceMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a workspace
+ */
+export const useCreateWorkspace = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createWorkspace>>,
+    TError,
+    { data: BodyType<CreateWorkspaceRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createWorkspace>>,
+  TError,
+  { data: BodyType<CreateWorkspaceRequest> },
+  TContext
+> => {
+  return useMutation(getCreateWorkspaceMutationOptions(options));
+};
+
+/**
+ * @summary Get workspace with all files
+ */
+export const getGetWorkspaceUrl = (id: number) => {
+  return `/api/workspaces/${id}`;
+};
+
+export const getWorkspace = async (
+  id: number,
+  options?: RequestInit,
+): Promise<WorkspaceWithFiles> => {
+  return customFetch<WorkspaceWithFiles>(getGetWorkspaceUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetWorkspaceQueryKey = (id: number) => {
+  return [`/api/workspaces/${id}`] as const;
+};
+
+export const getGetWorkspaceQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWorkspace>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getWorkspace>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetWorkspaceQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkspace>>> = ({
+    signal,
+  }) => getWorkspace(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getWorkspace>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetWorkspaceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWorkspace>>
+>;
+export type GetWorkspaceQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get workspace with all files
+ */
+
+export function useGetWorkspace<
+  TData = Awaited<ReturnType<typeof getWorkspace>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getWorkspace>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetWorkspaceQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update workspace
+ */
+export const getUpdateWorkspaceUrl = (id: number) => {
+  return `/api/workspaces/${id}`;
+};
+
+export const updateWorkspace = async (
+  id: number,
+  updateWorkspaceRequest: UpdateWorkspaceRequest,
+  options?: RequestInit,
+): Promise<WorkspaceItem> => {
+  return customFetch<WorkspaceItem>(getUpdateWorkspaceUrl(id), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateWorkspaceRequest),
+  });
+};
+
+export const getUpdateWorkspaceMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateWorkspace>>,
+    TError,
+    { id: number; data: BodyType<UpdateWorkspaceRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateWorkspace>>,
+  TError,
+  { id: number; data: BodyType<UpdateWorkspaceRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateWorkspace"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateWorkspace>>,
+    { id: number; data: BodyType<UpdateWorkspaceRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateWorkspace(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateWorkspaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateWorkspace>>
+>;
+export type UpdateWorkspaceMutationBody = BodyType<UpdateWorkspaceRequest>;
+export type UpdateWorkspaceMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update workspace
+ */
+export const useUpdateWorkspace = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateWorkspace>>,
+    TError,
+    { id: number; data: BodyType<UpdateWorkspaceRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateWorkspace>>,
+  TError,
+  { id: number; data: BodyType<UpdateWorkspaceRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateWorkspaceMutationOptions(options));
+};
+
+/**
+ * @summary Delete a workspace
+ */
+export const getDeleteWorkspaceUrl = (id: number) => {
+  return `/api/workspaces/${id}`;
+};
+
+export const deleteWorkspace = async (
+  id: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getDeleteWorkspaceUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteWorkspaceMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWorkspace>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteWorkspace>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteWorkspace"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteWorkspace>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteWorkspace(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteWorkspaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteWorkspace>>
+>;
+
+export type DeleteWorkspaceMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a workspace
+ */
+export const useDeleteWorkspace = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWorkspace>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteWorkspace>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteWorkspaceMutationOptions(options));
+};
+
+/**
+ * @summary Create a file in workspace
+ */
+export const getCreateFileUrl = (id: number) => {
+  return `/api/workspaces/${id}/files`;
+};
+
+export const createFile = async (
+  id: number,
+  createFileRequest: CreateFileRequest,
+  options?: RequestInit,
+): Promise<FileItem> => {
+  return customFetch<FileItem>(getCreateFileUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createFileRequest),
+  });
+};
+
+export const getCreateFileMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createFile>>,
+    TError,
+    { id: number; data: BodyType<CreateFileRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createFile>>,
+  TError,
+  { id: number; data: BodyType<CreateFileRequest> },
+  TContext
+> => {
+  const mutationKey = ["createFile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createFile>>,
+    { id: number; data: BodyType<CreateFileRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return createFile(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateFileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createFile>>
+>;
+export type CreateFileMutationBody = BodyType<CreateFileRequest>;
+export type CreateFileMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a file in workspace
+ */
+export const useCreateFile = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createFile>>,
+    TError,
+    { id: number; data: BodyType<CreateFileRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createFile>>,
+  TError,
+  { id: number; data: BodyType<CreateFileRequest> },
+  TContext
+> => {
+  return useMutation(getCreateFileMutationOptions(options));
+};
+
+/**
+ * @summary Update file content
+ */
+export const getUpdateFileUrl = (id: number, fileId: number) => {
+  return `/api/workspaces/${id}/files/${fileId}`;
+};
+
+export const updateFile = async (
+  id: number,
+  fileId: number,
+  updateFileRequest: UpdateFileRequest,
+  options?: RequestInit,
+): Promise<FileItem> => {
+  return customFetch<FileItem>(getUpdateFileUrl(id, fileId), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateFileRequest),
+  });
+};
+
+export const getUpdateFileMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateFile>>,
+    TError,
+    { id: number; fileId: number; data: BodyType<UpdateFileRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateFile>>,
+  TError,
+  { id: number; fileId: number; data: BodyType<UpdateFileRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateFile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateFile>>,
+    { id: number; fileId: number; data: BodyType<UpdateFileRequest> }
+  > = (props) => {
+    const { id, fileId, data } = props ?? {};
+
+    return updateFile(id, fileId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateFileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateFile>>
+>;
+export type UpdateFileMutationBody = BodyType<UpdateFileRequest>;
+export type UpdateFileMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update file content
+ */
+export const useUpdateFile = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateFile>>,
+    TError,
+    { id: number; fileId: number; data: BodyType<UpdateFileRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateFile>>,
+  TError,
+  { id: number; fileId: number; data: BodyType<UpdateFileRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateFileMutationOptions(options));
+};
+
+/**
+ * @summary Delete a file
+ */
+export const getDeleteFileUrl = (id: number, fileId: number) => {
+  return `/api/workspaces/${id}/files/${fileId}`;
+};
+
+export const deleteFile = async (
+  id: number,
+  fileId: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getDeleteFileUrl(id, fileId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteFileMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteFile>>,
+    TError,
+    { id: number; fileId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteFile>>,
+  TError,
+  { id: number; fileId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteFile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteFile>>,
+    { id: number; fileId: number }
+  > = (props) => {
+    const { id, fileId } = props ?? {};
+
+    return deleteFile(id, fileId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteFileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteFile>>
+>;
+
+export type DeleteFileMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a file
+ */
+export const useDeleteFile = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteFile>>,
+    TError,
+    { id: number; fileId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteFile>>,
+  TError,
+  { id: number; fileId: number },
+  TContext
+> => {
+  return useMutation(getDeleteFileMutationOptions(options));
+};
+
+/**
+ * @summary Execute code in sandbox
+ */
+export const getExecuteCodeUrl = () => {
+  return `/api/execute`;
+};
+
+export const executeCode = async (
+  executeRequest: ExecuteRequest,
+  options?: RequestInit,
+): Promise<ExecuteResponse> => {
+  return customFetch<ExecuteResponse>(getExecuteCodeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(executeRequest),
+  });
+};
+
+export const getExecuteCodeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof executeCode>>,
+    TError,
+    { data: BodyType<ExecuteRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof executeCode>>,
+  TError,
+  { data: BodyType<ExecuteRequest> },
+  TContext
+> => {
+  const mutationKey = ["executeCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof executeCode>>,
+    { data: BodyType<ExecuteRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return executeCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExecuteCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof executeCode>>
+>;
+export type ExecuteCodeMutationBody = BodyType<ExecuteRequest>;
+export type ExecuteCodeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Execute code in sandbox
+ */
+export const useExecuteCode = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof executeCode>>,
+    TError,
+    { data: BodyType<ExecuteRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof executeCode>>,
+  TError,
+  { data: BodyType<ExecuteRequest> },
+  TContext
+> => {
+  return useMutation(getExecuteCodeMutationOptions(options));
+};
+
+/**
+ * @summary Get available language runtimes
+ */
+export const getGetRuntimesUrl = () => {
+  return `/api/execute/runtimes`;
+};
+
+export const getRuntimes = async (
+  options?: RequestInit,
+): Promise<RuntimesResponse> => {
+  return customFetch<RuntimesResponse>(getGetRuntimesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRuntimesQueryKey = () => {
+  return [`/api/execute/runtimes`] as const;
+};
+
+export const getGetRuntimesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRuntimes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRuntimes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetRuntimesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRuntimes>>> = ({
+    signal,
+  }) => getRuntimes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRuntimes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRuntimesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRuntimes>>
+>;
+export type GetRuntimesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get available language runtimes
+ */
+
+export function useGetRuntimes<
+  TData = Awaited<ReturnType<typeof getRuntimes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRuntimes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRuntimesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary AI code assistant with code context
+ */
+export const getAiCodeAssistUrl = () => {
+  return `/api/ai/code`;
+};
+
+export const aiCodeAssist = async (
+  aiCodeRequest: AiCodeRequest,
+  options?: RequestInit,
+): Promise<AiCodeResponse> => {
+  return customFetch<AiCodeResponse>(getAiCodeAssistUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(aiCodeRequest),
+  });
+};
+
+export const getAiCodeAssistMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiCodeAssist>>,
+    TError,
+    { data: BodyType<AiCodeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof aiCodeAssist>>,
+  TError,
+  { data: BodyType<AiCodeRequest> },
+  TContext
+> => {
+  const mutationKey = ["aiCodeAssist"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof aiCodeAssist>>,
+    { data: BodyType<AiCodeRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return aiCodeAssist(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AiCodeAssistMutationResult = NonNullable<
+  Awaited<ReturnType<typeof aiCodeAssist>>
+>;
+export type AiCodeAssistMutationBody = BodyType<AiCodeRequest>;
+export type AiCodeAssistMutationError = ErrorType<unknown>;
+
+/**
+ * @summary AI code assistant with code context
+ */
+export const useAiCodeAssist = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof aiCodeAssist>>,
+    TError,
+    { data: BodyType<AiCodeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof aiCodeAssist>>,
+  TError,
+  { data: BodyType<AiCodeRequest> },
+  TContext
+> => {
+  return useMutation(getAiCodeAssistMutationOptions(options));
+};

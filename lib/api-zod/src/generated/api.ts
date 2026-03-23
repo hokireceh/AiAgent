@@ -188,3 +188,202 @@ export const SearchMemoriesResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * @summary List all workspaces
+ */
+export const GetWorkspacesResponse = zod.object({
+  workspaces: zod.array(
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      language: zod.string(),
+      description: zod.string().nullish(),
+      createdAt: zod.date(),
+      updatedAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Create a workspace
+ */
+export const CreateWorkspaceBody = zod.object({
+  name: zod.string(),
+  language: zod.string(),
+  description: zod.string().optional(),
+});
+
+/**
+ * @summary Get workspace with all files
+ */
+export const GetWorkspaceParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetWorkspaceResponse = zod.object({
+  workspace: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    language: zod.string(),
+    description: zod.string().nullish(),
+    createdAt: zod.date(),
+    updatedAt: zod.date(),
+  }),
+  files: zod.array(
+    zod.object({
+      id: zod.number(),
+      workspaceId: zod.number(),
+      name: zod.string(),
+      path: zod.string(),
+      content: zod.string(),
+      language: zod.string(),
+      createdAt: zod.date(),
+      updatedAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Update workspace
+ */
+export const UpdateWorkspaceParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateWorkspaceBody = zod.object({
+  name: zod.string().optional(),
+  language: zod.string().optional(),
+  description: zod.string().optional(),
+});
+
+export const UpdateWorkspaceResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  language: zod.string(),
+  description: zod.string().nullish(),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+
+/**
+ * @summary Delete a workspace
+ */
+export const DeleteWorkspaceParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteWorkspaceResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * @summary Create a file in workspace
+ */
+export const CreateFileParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CreateFileBody = zod.object({
+  name: zod.string(),
+  path: zod.string(),
+  content: zod.string().optional(),
+  language: zod.string(),
+});
+
+/**
+ * @summary Update file content
+ */
+export const UpdateFileParams = zod.object({
+  id: zod.coerce.number(),
+  fileId: zod.coerce.number(),
+});
+
+export const UpdateFileBody = zod.object({
+  content: zod.string(),
+  name: zod.string().optional(),
+});
+
+export const UpdateFileResponse = zod.object({
+  id: zod.number(),
+  workspaceId: zod.number(),
+  name: zod.string(),
+  path: zod.string(),
+  content: zod.string(),
+  language: zod.string(),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+
+/**
+ * @summary Delete a file
+ */
+export const DeleteFileParams = zod.object({
+  id: zod.coerce.number(),
+  fileId: zod.coerce.number(),
+});
+
+export const DeleteFileResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * @summary Execute code in sandbox
+ */
+export const ExecuteCodeBody = zod.object({
+  language: zod.string(),
+  version: zod.string(),
+  code: zod.string(),
+  stdin: zod.string().nullish(),
+});
+
+export const ExecuteCodeResponse = zod.object({
+  stdout: zod.string(),
+  stderr: zod.string(),
+  output: zod.string(),
+  exitCode: zod.number(),
+  language: zod.string(),
+  version: zod.string(),
+  cpuTime: zod.number().nullish(),
+  wallTime: zod.number().nullish(),
+});
+
+/**
+ * @summary Get available language runtimes
+ */
+export const GetRuntimesResponse = zod.object({
+  runtimes: zod.array(
+    zod.object({
+      language: zod.string(),
+      version: zod.string(),
+      aliases: zod.array(zod.string()),
+      runtime: zod.string().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary AI code assistant with code context
+ */
+export const AiCodeAssistBody = zod.object({
+  message: zod.string(),
+  code: zod.string().nullish(),
+  language: zod.string().nullish(),
+  filename: zod.string().nullish(),
+  history: zod
+    .array(
+      zod.object({
+        role: zod.enum(["user", "assistant"]),
+        content: zod.string(),
+      }),
+    )
+    .nullish(),
+});
+
+export const AiCodeAssistResponse = zod.object({
+  content: zod.string(),
+  model: zod.string(),
+  tier: zod.number(),
+});

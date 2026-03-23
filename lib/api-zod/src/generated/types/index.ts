@@ -6,14 +6,23 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./aiCodeRequest";
+export * from "./aiCodeRequestHistoryItem";
+export * from "./aiCodeRequestHistoryItemRole";
+export * from "./aiCodeResponse";
 export * from "./chatRequest";
 export * from "./chatResponse";
 export * from "./conversation";
 export * from "./conversationDetail";
 export * from "./conversationsResponse";
 export * from "./createConversationRequest";
+export * from "./createFileRequest";
 export * from "./createMemoryRequest";
+export * from "./createWorkspaceRequest";
 export * from "./errorResponse";
+export * from "./executeRequest";
+export * from "./executeResponse";
+export * from "./fileItem";
 export * from "./healthStatus";
 export * from "./memoriesResponse";
 export * from "./memoryItem";
@@ -21,7 +30,14 @@ export * from "./message";
 export * from "./messageRole";
 export * from "./modelInfo";
 export * from "./modelsResponse";
+export * from "./runtimeItem";
+export * from "./runtimesResponse";
 export * from "./searchMemoriesParams";
 export * from "./successResponse";
+export * from "./updateFileRequest";
+export * from "./updateWorkspaceRequest";
 export * from "./usageResponse";
 export * from "./usageStats";
+export * from "./workspaceItem";
+export * from "./workspacesResponse";
+export * from "./workspaceWithFiles";

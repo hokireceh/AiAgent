@@ -1,0 +1,14 @@
+packages:
+  "@monaco-editor/react": "Core IDE editor component"
+  "framer-motion": "Smooth layout animations for panels"
+  "react-markdown": "Render AI assistant responses properly"
+  "date-fns": "Format timestamps in UI"
+  "clsx": "Utility for Tailwind class merging"
+  "tailwind-merge": "Utility for Tailwind class merging"
+
+images: []
+
+notes:
+  - Assumes Monaco editor handles its own internal workers
+  - The API routes use the generated hooks from @workspace/api-client-react
+  - Execution relies on /api/execute being available and proxying to Piston
